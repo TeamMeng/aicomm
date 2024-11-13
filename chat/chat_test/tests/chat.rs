@@ -132,7 +132,7 @@ impl ChatServer {
     async fn signin(&self) -> Result<String> {
         let res = self
             .client
-            .post(&format!("http://{}/api/signin", self.addr))
+            .post(format!("http://{}/api/signin", self.addr))
             .header("Content-Type", "application/json")
             .body(r#"{"email": "tchen@acme.org","password":"123456"}"#)
             .send()
