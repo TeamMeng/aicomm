@@ -20,8 +20,9 @@ Before you begin, ensure you have met the following requirements:
 ## Setup
 
 1. Clone the repository:
+
    ```
-   git clone https://github.com/tyr-rust-bootcamp/aicomm.git
+   git clone https://github.com/TeamMeng/aicomm.git
    cd aicomm
    ```
 
@@ -31,10 +32,10 @@ Before you begin, ensure you have met the following requirements:
    yarn
    ```
 
-
 ## Running the App
 
 First, run the server:
+
 ```
 cd chat/chat_server
 cargo run
@@ -44,12 +45,14 @@ cargo run
 ```
 
 To run the desktop app, you could use:
+
 ```
 cd chatapp
 cargo tauri dev
 ```
 
 To run the web app, you could use:
+
 ```
 cd chatapp
 yarn dev
