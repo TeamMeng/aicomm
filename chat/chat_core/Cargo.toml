@@ -18,4 +18,4 @@ tokio = { workspace = true }
 tower = { workspace = true }
 tower-http = { workspace = true }
 tracing = { workspace = true }
-uuid = { version = "1.8.0", features = ["v7", "serde"] }
+uuid = { version = "1.11.0", features = ["v7", "serde"] }
