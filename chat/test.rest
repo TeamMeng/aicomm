@@ -131,10 +131,10 @@ Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=MyBoundary
 
 --MyBoundary
-Content-Disposition: form-data; filename="xdiff1.png"
+Content-Disposition: form-data; filename="WechatIMG28.png"
 Content-Type: application/octet-stream
 
-< /Users/tchen/snapshots/xdiff1.png
+< ~/Desktop/WechatIMG28.png
 --MyBoundary
 Content-Disposition: form-data; filename="hello.txt"
 Content-Type: text/plain
@@ -143,10 +143,15 @@ Hello, World!
 --MyBoundary--
 
 
+/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png
 ### get files
 
-GET http://localhost:6688/api/files/1/339/807/e635afbeab088ce33206fdf4223a6bb156.png
+GET http://localhost:6688/api/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png
 Authorization: Bearer {{token}}
+
+### get files with token
+
+GET http://localhost:6688/api/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png?token={{token}}
 
 
 ### send a message

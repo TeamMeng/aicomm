@@ -48,7 +48,6 @@ pub(crate) async fn file_handler(
     }
 
     let mime = mime_guess::from_path(&path).first_or_octet_stream();
-    // TODO: streaming
     let body = fs::read(path).await?;
     let mut headers = HeaderMap::new();
     headers.insert("content-type", mime.to_string().parse().unwrap());
