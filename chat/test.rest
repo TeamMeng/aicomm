@@ -1,5 +1,4 @@
 ### signup user
-
 POST http://localhost:6688/api/signup
 Content-Type: application/json
 
@@ -11,7 +10,6 @@ Content-Type: application/json
 }
 
 ### signup user
-
 POST http://localhost:6688/api/signup
 Content-Type: application/json
 
@@ -23,7 +21,6 @@ Content-Type: application/json
 }
 
 ### signup user
-
 POST http://localhost:6688/api/signup
 Content-Type: application/json
 
@@ -35,7 +32,6 @@ Content-Type: application/json
 }
 
 ### signin user (invalid)
-
 POST http://localhost:6688/api/signin
 Content-Type: application/json
 
@@ -45,7 +41,6 @@ Content-Type: application/json
 }
 
 ### signin user (valid)
-
 # @name signin
 POST http://localhost:6688/api/signin
 Content-Type: application/json
@@ -58,7 +53,6 @@ Content-Type: application/json
 @token = {{signin.response.body.token}}
 
 ### signin user (valid)
-
 # @name signin1
 POST http://localhost:6688/api/signin
 Content-Type: application/json
@@ -114,18 +108,15 @@ Authorization: Bearer {{token1}}
 
 
 ### get chat list
-
 GET http://localhost:6688/api/chats
 Authorization: Bearer {{token}}
 
 ### get user list
-
 GET http://localhost:6688/api/users
 Authorization: Bearer {{token}}
 
 
 ### upload files
-
 POST http://localhost:6688/api/upload
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=MyBoundary
@@ -142,20 +133,15 @@ Content-Type: text/plain
 Hello, World!
 --MyBoundary--
 
-
-/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png
 ### get files
-
 GET http://localhost:6688/api/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png
 Authorization: Bearer {{token}}
 
 ### get files with token
-
 GET http://localhost:6688/api/files/1/334/aa2/276471d0764f4e6f207f91ebe0597b4580.png?token={{token}}
 
 
 ### send a message
-
 POST http://localhost:6688/api/chats/1
 Content-Type: application/json
 Authorization: Bearer {{token}}
@@ -166,25 +152,34 @@ Authorization: Bearer {{token}}
 }
 
 ### get messages
-
 GET http://localhost:6688/api/chats/1/messages?limit=6&last_id=5
 Authorization: Bearer {{token}}
 
+### create chat agent
+POST http://localhost:6688/api/chats/1/agents
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
-# ### use cloudflare AI
+{
+    "name": "agent4",
+    "type": "proxy",
+    "prompt": "You are a helpful assistant"
+}
 
-# POST https://api.cloudflare.com/client/v4/accounts/{{cfAccount}}/ai/run/@cf/meta/llama-3-8b-instruct
-# Authorization: Bearer {{cfToken}}
+### list chat agents
+GET http://localhost:6688/api/chats/1/agents
+Authorization: Bearer {{token}}
 
-# {
-#     "messages": [
-#         {
-#             "role": "system",
-#             "content": "You are a friendly assistant that answers questions based on your knowledge. Your reply will be limited to 100 words. reply with simplified Chinese, unless the question asks for a specific language."
-#         },
-#         {
-#             "role": "user",
-#             "content": "中国上最长的河流是哪条？"
-#         }
-#     ]
-# }
+
+### update chat agent
+PATCH http://localhost:6688/api/chats/1/agents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "id": 2,
+    "prompt": "You are very helpful",
+    "args": {
+        "a": 1
+    }
+}
