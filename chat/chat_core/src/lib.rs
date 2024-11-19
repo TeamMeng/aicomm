@@ -10,14 +10,10 @@ pub use utils::*;
 
 #[allow(async_fn_in_trait)]
 pub trait Agent {
-    async fn process(
-        &self,
-        message: Message,
-        ctx: &AgentContext,
-    ) -> Result<AgentDecision, AgentError>;
+    async fn process(&self, msg: &str, ctx: &AgentContext) -> Result<AgentDecision, AgentError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AgentContext {}
 
 #[derive(Debug)]
@@ -32,6 +28,9 @@ pub enum AgentDecision {
 pub enum AgentError {
     #[error("network error: {0}")]
     NetWork(String),
+
+    #[error("{0}")]
+    AnyError(#[from] anyhow::Error),
 }
 
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize, PartialEq)]
@@ -123,6 +122,15 @@ pub enum AgentType {
     Tap,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd, sqlx::Type)]
+#[sqlx(type_name = "adapter_type", rename_all = "snake_case")]
+#[serde(rename_all(serialize = "camelCase"))]
+pub enum AdapterType {
+    #[serde(alias = "ollama", alias = "Ollama")]
+    #[default]
+    Ollama,
+}
+
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all(serialize = "camelCase"))]
 pub struct ChatAgent {
@@ -131,6 +139,8 @@ pub struct ChatAgent {
     pub chat_id: i64,
     pub name: String,
     pub r#type: AgentType,
+    pub adapter: AdapterType,
+    pub model: String,
     pub prompt: String,
     pub args: sqlx::types::Json<serde_json::Value>,
     #[serde(alias = "createdAt")]

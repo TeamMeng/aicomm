@@ -171,6 +171,8 @@ impl ChatServer {
                 r#"{
                 "name": "test agent",
                 "type": "proxy",
+                "adapter": "ollama",
+                "model": "llama3.2",
                 "prompt": "You are a helpful agent"
             }"#,
             );

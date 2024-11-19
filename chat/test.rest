@@ -122,7 +122,7 @@ Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=MyBoundary
 
 --MyBoundary
-Content-Disposition: form-data; filename="WechatIMG28.png"
+Content-Disposition: form-data; filename="5eeb7e3be8ae01592491579706.png"
 Content-Type: application/octet-stream
 
 < ~/Desktop/WechatIMG28.png
@@ -161,9 +161,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "name": "agent4",
+    "name": "translator",
     "type": "proxy",
-    "prompt": "You are a helpful assistant"
+    "adapter": "ollama",
+    "model": "llama3.2",
+    "prompt": "You're the world's best translator. You understand English and Chinese well, also their culture and idioms. You will translate user input between English and Chinese. If the original text is English, you will translate it to elegant, authentic Simplified Chinese. If the original text is Chinese, you will translate it to elegant, authentic English. Only return the translated sentences, no other text or comments. below are the text to translate:"
 }
 
 ### list chat agents
@@ -182,4 +184,24 @@ Content-Type: application/json
     "args": {
         "a": 1
     }
+}
+
+### send a chinese message
+POST http://localhost:6688/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "content": "你好, 今天工作辛苦了!",
+    "files": []
+}
+
+### send a english message
+POST http://localhost:6688/api/chats/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "content": "Well done! You made great progress today",
+    "files": []
 }

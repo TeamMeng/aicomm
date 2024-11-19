@@ -1,10 +1,13 @@
 mod adapters;
 
+use anyhow::Result;
 use std::fmt::Display;
 
-use anyhow::Result;
-
 pub use adapters::*;
+
+pub enum AiAdapter {
+    Ollama(OllamaAdapter),
+}
 
 #[derive(Debug)]
 pub enum Role {
@@ -24,6 +27,14 @@ pub trait AiService {
     async fn complete(&self, messages: &[Message]) -> Result<String>;
 }
 
+impl AiService for AiAdapter {
+    async fn complete(&self, messages: &[Message]) -> Result<String> {
+        match self {
+            Self::Ollama(adapter) => adapter.complete(messages).await,
+        }
+    }
+}
+
 impl Display for Role {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -31,5 +42,26 @@ impl Display for Role {
             Self::Assistant => write!(f, "assistant"),
             Self::System => write!(f, "system"),
         }
+    }
+}
+
+impl Message {
+    pub fn new(role: Role, content: impl Into<String>) -> Self {
+        Self {
+            role,
+            content: content.into(),
+        }
+    }
+
+    pub fn user(content: impl Into<String>) -> Self {
+        Self::new(Role::User, content)
+    }
+
+    pub fn assistant(content: impl Into<String>) -> Self {
+        Self::new(Role::Assistant, content)
+    }
+
+    pub fn system(content: impl Into<String>) -> Self {
+        Self::new(Role::System, content)
     }
 }
