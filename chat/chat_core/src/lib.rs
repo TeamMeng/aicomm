@@ -129,6 +129,8 @@ pub enum AdapterType {
     #[serde(alias = "ollama", alias = "Ollama")]
     #[default]
     Ollama,
+    #[serde(alias = "test", alias = "Test")]
+    Test,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize, PartialEq)]

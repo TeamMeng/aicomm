@@ -7,6 +7,7 @@ pub enum AgentVariant {
     Proxy(ProxyAgent),
     Reply(ReplyAgent),
     Tap(TapAgent),
+    Test(TestAgent),
 }
 
 #[allow(unused)]
@@ -33,8 +34,12 @@ pub struct TapAgent {
     pub args: serde_json::Value,
 }
 
+#[allow(unused)]
+pub struct TestAgent;
+
 impl Agent for ProxyAgent {
     async fn process(&self, msg: &str, _ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
+        // If we need it to be flexible: prompt is a jinja2 template, and args is a json
         let prompt = format!("{} {}", self.prompt, msg);
         let messages = vec![ai_sdk::Message::user(prompt)];
         let res = self.adapter.complete(&messages).await?;
@@ -44,6 +49,11 @@ impl Agent for ProxyAgent {
 
 impl Agent for ReplyAgent {
     async fn process(&self, msg: &str, _ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
+        // 1. create embedding for the message
+        // 2. search related docs via vector db with embedding
+        //let docs = searcher.search(msg).await?;
+        // 3. query llm with prompt and related docs as context
+        // let prompt = format!("{} {} {}", self.prompt, docs, msg);
         let prompt = format!("{} {}", self.prompt, msg);
         let messages = vec![ai_sdk::Message::user(prompt)];
         let res = self.adapter.complete(&messages).await?;
@@ -51,65 +61,75 @@ impl Agent for ReplyAgent {
     }
 }
 
+// in future, we should push messages into a queue and process in a delayed manner
 impl Agent for TapAgent {
     async fn process(&self, _msg: &str, _ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
         Ok(AgentDecision::None)
     }
 }
 
+impl Agent for TestAgent {
+    async fn process(&self, _msg: &str, _ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
+        Ok(AgentDecision::Modify("test".to_string()))
+    }
+}
+
 impl Agent for AgentVariant {
     async fn process(&self, msg: &str, ctx: &AgentContext) -> Result<AgentDecision, AgentError> {
         match self {
-            AgentVariant::Proxy(agent) => agent.process(msg, ctx).await,
             AgentVariant::Reply(agent) => agent.process(msg, ctx).await,
+            AgentVariant::Proxy(agent) => agent.process(msg, ctx).await,
             AgentVariant::Tap(agent) => agent.process(msg, ctx).await,
+            AgentVariant::Test(agent) => agent.process(msg, ctx).await,
         }
     }
 }
 
 impl From<ChatAgent> for AgentVariant {
-    fn from(mut value: ChatAgent) -> Self {
-        let adapter = match value.adapter {
-            AdapterType::Ollama => AiAdapter::Ollama(OllamaAdapter::new_local(value.model)),
+    fn from(mut agent: ChatAgent) -> Self {
+        let adapter: AiAdapter = match agent.adapter {
+            AdapterType::Ollama => OllamaAdapter::new_local(agent.model).into(),
+            AdapterType::Test => return AgentVariant::Test(TestAgent),
         };
-        match value.r#type {
+
+        match agent.r#type {
             AgentType::Reply => AgentVariant::Reply(ReplyAgent {
-                name: value.name,
+                name: agent.name,
                 adapter,
-                prompt: value.prompt,
-                args: value.args.take(),
+                prompt: agent.prompt,
+                args: agent.args.take(),
             }),
             AgentType::Proxy => AgentVariant::Proxy(ProxyAgent {
-                name: value.name,
+                name: agent.name,
                 adapter,
-                prompt: value.prompt,
-                args: value.args.take(),
+                prompt: agent.prompt,
+                args: agent.args.take(),
             }),
             AgentType::Tap => AgentVariant::Tap(TapAgent {
-                name: value.name,
+                name: agent.name,
                 adapter,
-                prompt: value.prompt,
-                args: value.args.take(),
+                prompt: agent.prompt,
+                args: agent.args.take(),
             }),
         }
     }
 }
 
 impl From<ProxyAgent> for AgentVariant {
-    fn from(value: ProxyAgent) -> Self {
-        AgentVariant::Proxy(value)
+    fn from(agent: ProxyAgent) -> Self {
+        AgentVariant::Proxy(agent)
     }
 }
 
 impl From<ReplyAgent> for AgentVariant {
-    fn from(value: ReplyAgent) -> Self {
-        AgentVariant::Reply(value)
+    fn from(agent: ReplyAgent) -> Self {
+        AgentVariant::Reply(agent)
     }
 }
 
 impl From<TapAgent> for AgentVariant {
-    fn from(value: TapAgent) -> Self {
-        AgentVariant::Tap(value)
+    fn from(agent: TapAgent) -> Self {
+        AgentVariant::Tap(agent)
     }
 }
 
@@ -123,10 +143,11 @@ mod tests {
     #[tokio::test]
     async fn agent_variant_should_work() -> Result<()> {
         let (_tdb, state) = AppState::new_for_test().await?;
-        let agents = state.list_agents(1).await?;
+        let agents = state.list_agents(1).await.expect("list agents failed");
         let agent = agents[0].clone();
         let agent: AgentVariant = agent.into();
         let decision = agent.process("hello", &AgentContext::default()).await?;
+        // test if it is modify
         if let AgentDecision::Modify(_content) = decision {
         } else {
             panic!("decision is not modify");

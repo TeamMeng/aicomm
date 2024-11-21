@@ -1,6 +1,7 @@
 -- add adapter_type, adapter and model to agent
 CREATE TYPE adapter_type AS ENUM(
-    'ollama'
+    'ollama',
+    'test'
 );
 
 ALTER TABLE chat_agents
